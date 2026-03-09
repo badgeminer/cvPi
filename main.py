@@ -67,34 +67,41 @@ parser.add_argument('--input', help='Path to input image.',
                     default='pca_test1.jpg')
 args = parser.parse_args()
 
-src = cv.imread(cv.samples.findFile(args.input))
-# Check if image is loaded successfully
-if src is None:
-    print('Could not open or find the image: ', args.input)
-    exit(0)
-
-cv.imshow('src', src)
 
 
-# Convert image to grayscale
-gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
+cap = cv.VideoCapture(0)
+if not cap.isOpened():
+    print("Cannot open camera")
+    exit()
+while True:
+    ret, src = cap.read()
+ 
+    # if frame is read correctly ret is True
+    if not ret:
+        print("Can't receive frame (stream end?). Exiting ...")
+        break
 
-# Convert image to binary
-_, bw = cv.threshold(gray, 50, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
 
-contours, _ = cv.findContours(bw, cv.RETR_LIST, cv.CHAIN_APPROX_NONE)
+    # Convert image to grayscale
+    gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
 
-for i, c in enumerate(contours):
-    # Calculate the area of each contour
-    area = cv.contourArea(c)
-    # Ignore contours that are too small or too large
-    if area < 1e2 or 1e5 < area:
-        continue
+    # Convert image to binary
+    _, bw = cv.threshold(gray, 50, 255, cv.THRESH_BINARY | cv.THRESH_OTSU)
 
-    # Draw each contour only for visualisation purposes
-    cv.drawContours(src, contours, i, (0, 0, 255), 2)
-    # Find the orientation of each shape
-    getOrientation(c, src)
+    contours, _ = cv.findContours(bw, cv.RETR_LIST, cv.CHAIN_APPROX_NONE)
 
-cv.imshow('output', src)
-cv.waitKey()
+    for i, c in enumerate(contours):
+        # Calculate the area of each contour
+        area = cv.contourArea(c)
+        # Ignore contours that are too small or too large
+        if area < 1e2 or 1e5 < area:
+            continue
+
+        # Draw each contour only for visualisation purposes
+        cv.drawContours(src, contours, i, (0, 0, 255), 2)
+        # Find the orientation of each shape
+        getOrientation(c, src)
+
+    cv.imshow('output', src)
+    if cv.waitKey(1) == ord('q'):
+        break
