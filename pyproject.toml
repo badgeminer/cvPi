@@ -12,5 +12,5 @@ dependencies = [
 
 [dependency-groups]
 pi = [
-    "picamera[array]",
+    "picamera2",
 ]
