@@ -12,5 +12,7 @@ dependencies = [
 
 [dependency-groups]
 pi = [
-    "picamera2"
+    "picamera2",
+    "rpi-libcamera",
+    "rpi-kms"
 ]
