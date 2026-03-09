@@ -2,9 +2,16 @@ from __future__ import print_function
 from __future__ import division
 import cv2 as cv
 import numpy as np
-import argparse
+import argparse,time
 from math import atan2, cos, sin, sqrt, pi
+import os,sys
 
+isPI = False
+
+if "-p" in sys.argv:
+    from picamera.array import PiRGBArray
+    from picamera import PiCamera
+    isPI =True
 
 def drawAxis(img, p_, q_, colour, scale):
     p = list(p_)
@@ -60,28 +67,7 @@ def getOrientation(pts, img):
 
     return angle
 
-
-parser = argparse.ArgumentParser(description='Code for Introduction to Principal Component Analysis (PCA) tutorial.\
-                                              This program demonstrates how to use OpenCV PCA to extract the orientation of an object.')
-parser.add_argument('--input', help='Path to input image.',
-                    default='pca_test1.jpg')
-args = parser.parse_args()
-
-
-
-cap = cv.VideoCapture(0)
-if not cap.isOpened():
-    print("Cannot open camera")
-    exit()
-while True:
-    ret, src = cap.read()
- 
-    # if frame is read correctly ret is True
-    if not ret:
-        print("Can't receive frame (stream end?). Exiting ...")
-        break
-
-
+def do_frame(src):
     # Convert image to grayscale
     gray = cv.cvtColor(src, cv.COLOR_BGR2GRAY)
 
@@ -105,3 +91,35 @@ while True:
     cv.imshow('output', src)
     if cv.waitKey(1) == ord('q'):
         break
+
+
+if isPI:
+    camera = PiCamera()
+    camera.resolution = (640, 480)
+    camera.framerate = 32
+    rawCapture = PiRGBArray(camera, size=(640, 480))
+    # allow the camera to warmup
+    time.sleep(0.1)
+    # capture frames from the camera
+    for frame in camera.capture_continuous(rawCapture, format="bgr", use_video_port=True):
+        # grab the raw NumPy array representing the image, then initialize the timestamp
+        # and occupied/unoccupied text
+        image = frame.array
+        do_frame(image)
+        
+
+else:
+    cap = cv.VideoCapture(0)
+    if not cap.isOpened():
+        print("Cannot open camera")
+        exit()
+    while True:
+        ret, src = cap.read()
+    
+        # if frame is read correctly ret is True
+        if not ret:
+            print("Can't receive frame (stream end?). Exiting ...")
+            break
+        do_frame(src)
+
+        
