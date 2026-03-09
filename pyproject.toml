@@ -13,4 +13,5 @@ dependencies = [
 [dependency-groups]
 pi = [
     "picamera2",
+    'libcamera'
 ]
