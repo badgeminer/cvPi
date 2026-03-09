@@ -89,7 +89,7 @@ def do_frame(src):
 
     cv.imshow('output', src)
     if cv.waitKey(1) == ord('q'):
-        break
+        sys.exit()
 
 
 if isPI:
